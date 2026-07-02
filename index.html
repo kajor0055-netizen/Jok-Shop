@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>บัญชีร้านโจ๊ก</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Prompt',sans-serif;background:#f1f5f4;color:#1a2e2b;padding-bottom:76px}
+.hidden{display:none!important}
+header{background:#0f766e;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+header h1{font-size:17px;font-weight:600}
+header button{background:rgba(255,255,255,.15);border:0;color:#fff;padding:6px 12px;border-radius:8px;font-family:inherit;font-size:13px}
+main{max-width:860px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h3{font-size:14px;font-weight:600;color:#0f766e;margin-bottom:10px}
+label{font-size:13px;color:#555;display:block;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid #d8e0de;border-radius:10px;font-family:inherit;font-size:15px;background:#fff}
+input:focus,select:focus{outline:none;border-color:#0f766e}
+.btn{width:100%;padding:13px;border:0;border-radius:12px;background:#0f766e;color:#fff;font-family:inherit;font-size:16px;font-weight:600;margin-top:14px;cursor:pointer}
+.btn:disabled{opacity:.5}
+.btn2{background:#fff;color:#0f766e;border:1.5px solid #0f766e}
+.seg{display:flex;gap:8px;margin-bottom:4px}
+.seg button{flex:1;padding:11px;border-radius:12px;border:1.5px solid #d8e0de;background:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;color:#666}
+.seg button.inc.on{background:#e6f7f0;border-color:#0a8f5b;color:#0a8f5b}
+.seg button.exp.on{background:#feeceb;border-color:#d93025;color:#d93025}
+.amount{font-size:28px;text-align:center;font-weight:700;letter-spacing:1px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{padding:8px 14px;border-radius:20px;border:1.5px solid #d8e0de;background:#fff;font-family:inherit;font-size:13px;cursor:pointer;color:#444}
+.chip.on{background:#0f766e;border-color:#0f766e;color:#fff}
+.mini{display:flex;gap:10px;text-align:center}
+.mini div{flex:1;background:#fff;border-radius:12px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.mini .t{font-size:12px;color:#777}
+.mini .v{font-size:16px;font-weight:700}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:640px){.grid3{grid-template-columns:1fr}}
+.pcard{background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.pcard .pt{font-size:13px;font-weight:600;color:#0f766e;margin-bottom:8px}
+.row{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
+.g{color:#0a8f5b;font-weight:600}.r{color:#d93025;font-weight:600}.b{font-weight:700}
+.txrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eef2f1}
+.txrow .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.txrow .info{flex:1;min-width:0}
+.txrow .cat{font-size:14px;font-weight:500}
+.txrow .nt{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txrow .amt{font-weight:700;font-size:15px;white-space:nowrap}
+.txrow .ops{display:flex;gap:6px}
+.txrow .ops button{border:0;background:#f1f5f4;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e3e9e7;display:flex;z-index:10;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:9px 0 7px;border:0;background:none;font-family:inherit;font-size:11px;color:#889;cursor:pointer}
+nav button .i{display:block;font-size:20px;margin-bottom:2px}
+nav button.on{color:#0f766e;font-weight:600}
+.auth{max-width:380px;margin:8vh auto;padding:0 16px}
+.auth .logo{text-align:center;font-size:44px;margin-bottom:6px}
+.auth h2{text-align:center;font-size:20px;margin-bottom:18px}
+.err{color:#d93025;font-size:13px;margin-top:10px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border:1px solid #e3e9e7;padding:5px 7px;text-align:left;white-space:nowrap}
+.note{font-size:12px;color:#777;margin-top:8px;line-height:1.6}
+.bar{height:8px;border-radius:4px;background:#eef2f1;overflow:hidden;margin:4px 0 8px}
+.bar i{display:block;height:100%;background:#0f766e}
+canvas{max-height:260px}
+</style>
+</head>
+<body>
+
+<div id="authView" class="auth">
+  <div class="logo">🥣</div>
+  <h2>บัญชีร้านโจ๊ก</h2>
+  <div class="card">
+    <label>อีเมล</label><input id="email" type="email" autocomplete="username">
+    <label>รหัสผ่าน</label><input id="pw" type="password" autocomplete="current-password">
+    <button class="btn" id="loginBtn" onclick="login()">เข้าสู่ระบบ</button>
+    <div class="err" id="authErr"></div>
+  </div>
+</div>
+
+<div id="appView" class="hidden">
+<header><h1>🥣 บัญชีร้านโจ๊ก</h1><button onclick="logout()">ออกจากระบบ</button></header>
+<main>
+
+<section id="tab-entry">
+  <div class="mini" style="margin-bottom:12px">
+    <div><div class="t">วันนี้รับ</div><div class="v g" id="mIn">0</div></div>
+    <div><div class="t">วันนี้จ่าย</div><div class="v r" id="mEx">0</div></div>
+    <div><div class="t">คงเหลือ</div><div class="v" id="mNet">0</div></div>
+  </div>
+  <div class="card">
+    <h3 id="formTitle">บันทึกรายการ</h3>
+    <div class="seg">
+      <button id="kInc" class="inc on" onclick="setKind('income')">＋ รายรับ</button>
+      <button id="kExp" class="exp" onclick="setKind('expense')">－ รายจ่าย</button>
+    </div>
+    <label>จำนวนเงิน (บาท)</label>
+    <input id="amt" class="amount" type="number" inputmode="decimal" placeholder="0.00">
+    <label>หมวดหมู่</label>
+    <div class="chips" id="catChips"></div>
+    <label>วันที่</label><input id="date" type="date">
+    <label>บันทึกช่วยจำ (ไม่บังคับ)</label><input id="note" type="text" placeholder="เช่น ซื้อหมูสับ 3 กก.">
+    <label>แนบรูปสลิป (ไม่บังคับ)</label>
+    <input id="slip" type="file" accept="image/*">
+    <button class="btn" id="saveBtn" onclick="saveTx()">บันทึก</button>
+    <button class="btn btn2 hidden" id="cancelEdit" onclick="resetForm()">ยกเลิกการแก้ไข</button>
+  </div>
+</section>
+
+<section id="tab-dash" class="hidden">
+  <div class="grid3" id="periodCards"></div>
+  <div class="card" style="margin-top:12px"><h3>รายรับ-รายจ่าย 14 วันล่าสุด</h3><canvas id="chDays"></canvas></div>
+  <div class="card"><h3>สัดส่วนรายจ่ายเดือนนี้</h3><canvas id="chCat"></canvas></div>
+  <div class="card"><h3>การบริหารต้นทุน (เดือนนี้)</h3><div id="costBox"></div></div>
+</section>
+
+<section id="tab-list" class="hidden">
+  <div class="card">
+    <h3>รายการทั้งหมด</h3>
+    <input id="listMonth" type="month" onchange="loadList()">
+    <div id="txList" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<section id="tab-import" class="hidden">
+  <div class="card">
+    <h3>นำเข้า Statement ธนาคาร (CSV / Excel)</h3>
+    <div class="note">ดาวน์โหลด statement จากแอปธนาคาร (K PLUS, SCB EASY ฯลฯ) เป็นไฟล์ CSV หรือ Excel แล้วเลือกไฟล์ที่นี่ ระบบจะอ่านและกันรายการซ้ำให้อัตโนมัติ</div>
+    <label>เลือกไฟล์</label><input id="impFile" type="file" accept=".csv,.xls,.xlsx">
+    <div id="impMap" class="hidden">
+      <label>คอลัมน์วันที่</label><select id="cDate"></select>
+      <label>คอลัมน์รายละเอียด</label><select id="cDesc"></select>
+      <label>รูปแบบจำนวนเงิน</label>
+      <select id="cMode" onchange="modeChange()">
+        <option value="one">คอลัมน์เดียว (บวก=เงินเข้า, ลบ=เงินออก)</option>
+        <option value="two">แยกคอลัมน์เงินเข้า / เงินออก</option>
+      </select>
+      <div id="oneBox"><label>คอลัมน์จำนวนเงิน</label><select id="cAmt"></select></div>
+      <div id="twoBox" class="hidden">
+        <label>คอลัมน์เงินเข้า (ฝาก)</label><select id="cIn"></select>
+        <label>คอลัมน์เงินออก (ถอน)</label><select id="cOut"></select>
+      </div>
+      <button class="btn btn2" onclick="previewImp()">ดูตัวอย่าง</button>
+      <div id="impPrev" style="margin-top:10px;overflow-x:auto"></div>
+      <button class="btn hidden" id="impGo" onclick="doImport()">นำเข้าข้อมูล</button>
+    </div>
+    <div class="note" id="impMsg"></div>
+  </div>
+</section>
+
+</main>
+<nav>
+  <button id="nb-entry" class="on" onclick="showTab('entry')"><span class="i">✏️</span>บันทึก</button>
+  <button id="nb-dash" onclick="showTab('dash')"><span class="i">📊</span>แดชบอร์ด</button>
+  <button id="nb-list" onclick="showTab('list')"><span class="i">📋</span>รายการ</button>
+  <button id="nb-import" onclick="showTab('import')"><span class="i">🏦</span>นำเข้า</button>
+</nav>
+</div>
+
+<script>
+var SB_URL='https://pynezkfmpdjgzcphmrek.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bmV6a2ZtcGRqZ3pjcGhtcmVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMjUxNDcsImV4cCI6MjA5NTgwMTE0N30.met9oQ4pfvjzilzA6NTy589KAt-x70vv-3W0ogpDHQQ';
+var sb=window.supabase.createClient(SB_URL,SB_KEY);
+var cats=[],TX=[],kind='income',selCat=null,editingId=null,charts={},impRows=[];
+var nf=new Intl.NumberFormat('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2});
+function money(n){return nf.format(n||0);}
+function pad(n){return (n<10?'0':'')+n;}
+function dstr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function today(){return dstr(new Date());}
+function el(id){return document.getElementById(id);}
+
+async function init(){
+  var s=await sb.auth.getSession();
+  if(s.data.session){enter();}else{el('authView').classList.remove('hidden');}
+}
+async function login(){
+  el('authErr').textContent='';el('loginBtn').disabled=true;
+  var r=await sb.auth.signInWithPassword({email:el('email').value.trim(),password:el('pw').value});
+  el('loginBtn').disabled=false;
+  if(r.error){el('authErr').textContent='เข้าสู่ระบบไม่สำเร็จ: อีเมลหรือรหัสผ่านไม่ถูกต้อง';return;}
+  enter();
+}
+async function logout(){await sb.auth.signOut();location.reload();}
+async function enter(){
+  el('authView').classList.add('hidden');el('appView').classList.remove('hidden');
+  el('date').value=today();
+  el('listMonth').value=today().slice(0,7);
+  await ensureCats();
+  await loadAll();
+}
+
+var DEFAULTS=[
+ ['ขายหน้าร้าน','income',null,1],
+ ['เดลิเวอรี (Grab/LineMan)','income',null,2],
+ ['รายรับอื่นๆ','income',null,9],
+ ['วัตถุดิบ (หมู ข้าว ไข่ ผัก)','expense','variable',1],
+ ['แก๊ส','expense','variable',2],
+ ['บรรจุภัณฑ์ (ถุง กล่อง ช้อน)','expense','variable',3],
+ ['ค่า GP / ค่าส่งแพลตฟอร์ม','expense','variable',4],
+ ['ค่าเช่าที่','expense','fixed',5],
+ ['ค่าน้ำ-ค่าไฟ','expense','fixed',6],
+ ['ค่าแรง','expense','fixed',7],
+ ['อุปกรณ์ / ซ่อมบำรุง','expense','fixed',8],
+ ['รายจ่ายอื่นๆ','expense','variable',9]
+];
+async function ensureCats(){
+  var r=await sb.from('fin_categories').select('*').order('kind').order('sort');
+  cats=r.data||[];
+  if(cats.length===0){
+    var rows=DEFAULTS.map(function(d){return {name:d[0],kind:d[1],cost_type:d[2],sort:d[3]};});
+    await sb.from('fin_categories').insert(rows);
+    r=await sb.from('fin_categories').select('*').order('kind').order('sort');
+    cats=r.data||[];
+  }
+  renderChips();
+}
+function renderChips(){
+  var box=el('catChips');box.innerHTML='';selCat=null;
+  cats.filter(function(c){return c.kind===kind&&c.is_active;}).forEach(function(c){
+    var b=document.createElement('button');b.className='chip';b.textContent=c.name;
+    b.onclick=function(){box.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on');});b.classList.add('on');selCat=c.id;};
+    box.appendChild(b);
+  });
+  var add=document.createElement('button');add.className='chip';add.textContent='＋ เพิ่มหมวด';
+  add.onclick=async function(){
+    var n=prompt('ชื่อหมวดหมู่ใหม่');if(!n)return;
+    var ct=null;
+    if(kind==='expense'){ct=confirm('เป็นต้นทุนผันแปรใช่ไหม? (OK=ผันแปร เช่น วัตถุดิบ / Cancel=คงที่ เช่น ค่าเช่า)')?'variable':'fixed';}
+    await sb.from('fin_categories').insert({name:n,kind:kind,cost_type:ct,sort:8});
+    await ensureCats();
+  };
+  box.appendChild(add);
+}
+function setKind(k){
+  kind=k;
+  el('kInc').classList.toggle('on',k==='income');
+  el('kExp').classList.toggle('on',k==='expense');
+  renderChips();
+}
+async function saveTx(){
+  var a=parseFloat(el('amt').value);
+  if(!a||a<=0){alert('กรุณาใส่จำนวนเงิน');return;}
+  if(!selCat){alert('กรุณาเลือกหมวดหมู่');return;}
+  el('saveBtn').disabled=true;
+  var row={kind:kind,amount:a,category_id:selCat,occurred_at:el('date').value||today(),note:el('note').value||null};
+  var f=el('slip').files[0];
+  if(f){
+    var u=(await sb.auth.getUser()).data.user;
+    var ext=f.name.indexOf('.')>-1?f.name.split('.').pop():'jpg';
+    var path=u.id+'/'+Date.now()+'.'+ext;
+    var up=await sb.storage.from('slips').upload(path,f);
+    if(!up.error){row.slip_path=path;row.source='slip';}
+  }
+  var r;
+  if(editingId){r=await sb.from('fin_transactions').update(row).eq('id',editingId);}
+  else{r=await sb.from('fin_transactions').insert(row);}
+  el('saveBtn').disabled=false;
+  if(r.error){alert('บันทึกไม่สำเร็จ: '+r.error.message);return;}
+  resetForm();
+  await loadAll();
+  alert('บันทึกเรียบร้อย ✓');
+}
+function resetForm(){
+  editingId=null;el('formTitle').textContent='บันทึกรายการ';
+  el('cancelEdit').classList.add('hidden');
+  el('amt').value='';el('note').value='';el('slip').value='';el('date').value=today();
+  renderChips();
+}
+
+async function loadAll(){
+  var d=new Date();d.setDate(d.getDate()-92);
+  var r=await sb.from('fin_transactions').select('*,fin_categories(name,cost_type)').gte('occurred_at',dstr(d)).order('occurred_at',{ascending:false}).limit(3000);
+  TX=r.data||[];
+  renderMini();renderDash();loadList();
+}
+function sumRange(from,to){
+  var i=0,e=0;
+  TX.forEach(function(t){if(t.occurred_at>=from&&t.occurred_at<=to){if(t.kind==='income')i+=+t.amount;else e+=+t.amount;}});
+  return {i:i,e:e,n:i-e};
+}
+function weekStart(){var d=new Date();var day=(d.getDay()+6)%7;d.setDate(d.getDate()-day);return dstr(d);}
+function renderMini(){
+  var s=sumRange(today(),today());
+  el('mIn').textContent=money(s.i);el('mEx').textContent=money(s.e);el('mNet').textContent=money(s.n);
+  el('mNet').style.color=s.n>=0?'#0a8f5b':'#d93025';
+}
+function renderDash(){
+  var t=today(),ws=weekStart(),ms=t.slice(0,8)+'01';
+  var defs=[['วันนี้',sumRange(t,t)],['สัปดาห์นี้',sumRange(ws,t)],['เดือนนี้',sumRange(ms,t)]];
+  var h='';
+  defs.forEach(function(d){
+    var s=d[1];
+    h+='<div class="pcard"><div class="pt">'+d[0]+'</div>'+
+       '<div class="row"><span>รายรับ</span><span class="g">'+money(s.i)+'</span></div>'+
+       '<div class="row"><span>รายจ่าย</span><span class="r">'+money(s.e)+'</span></div>'+
+       '<div class="row b"><span>กำไรสุทธิ</span><span style="color:'+(s.n>=0?'#0a8f5b':'#d93025')+'">'+money(s.n)+'</span></div></div>';
+  });
+  el('periodCards').innerHTML=h;
+  var labels=[],inc=[],exp=[];
+  for(var k=13;k>=0;k--){
+    var d=new Date();d.setDate(d.getDate()-k);var ds=dstr(d);
+    labels.push(d.getDate()+'/'+(d.getMonth()+1));
+    var s=sumRange(ds,ds);inc.push(s.i);exp.push(s.e);
+  }
+  mkChart('chDays','bar',{labels:labels,datasets:[{label:'รายรับ',data:inc,backgroundColor:'#0a8f5b'},{label:'รายจ่าย',data:exp,backgroundColor:'#e07a73'}]},{responsive:true,scales:{x:{grid:{display:false}}}});
+  var byCat={};
+  TX.forEach(function(x){
+    if(x.kind==='expense'&&x.occurred_at>=ms){
+      var n=x.fin_categories?x.fin_categories.name:'ไม่ระบุ';
+      byCat[n]=(byCat[n]||0)+ +x.amount;
+    }
+  });
+  var cl=Object.keys(byCat),cv=cl.map(function(k){return byCat[k];});
+  mkChart('chCat','doughnut',{labels:cl,datasets:[{data:cv,backgroundColor:['#0f766e','#e07a73','#eab308','#6366f1','#0ea5e9','#f97316','#84cc16','#d946ef','#64748b','#14b8a6','#a855f7','#f43f5e']}]},{responsive:true,plugins:{legend:{position:'right'}}});
+  var m=sumRange(ms,t),fx=0,vr=0;
+  TX.forEach(function(x){
+    if(x.kind==='expense'&&x.occurred_at>=ms){
+      var ct=x.fin_categories?x.fin_categories.cost_type:null;
+      if(ct==='fixed')fx+=+x.amount;else vr+=+x.amount;
+    }
+  });
+  var pv=m.i>0?Math.round(vr/m.i*100):0, pf=m.i>0?Math.round(fx/m.i*100):0, pm=m.i>0?Math.round(m.n/m.i*100):0;
+  var days=new Date().getDate();
+  var cb='<div class="row"><span>ต้นทุนผันแปร (วัตถุดิบ แก๊ส ฯลฯ)</span><span class="r">'+money(vr)+' ('+pv+'% ของรายรับ)</span></div>'+
+    '<div class="bar"><i style="width:'+Math.min(pv,100)+'%;background:#e07a73"></i></div>'+
+    '<div class="row"><span>ต้นทุนคงที่ (ค่าเช่า ค่าแรง ฯลฯ)</span><span class="r">'+money(fx)+' ('+pf+'% ของรายรับ)</span></div>'+
+    '<div class="bar"><i style="width:'+Math.min(pf,100)+'%;background:#eab308"></i></div>'+
+    '<div class="row b"><span>อัตรากำไรสุทธิ</span><span style="color:'+(pm>=0?'#0a8f5b':'#d93025')+'">'+pm+'%</span></div>'+
+    '<div class="row"><span>รายรับเฉลี่ย/วัน</span><span>'+money(days>0?m.i/days:0)+'</span></div>'+
+    '<div class="row"><span>รายจ่ายเฉลี่ย/วัน</span><span>'+money(days>0?m.e/days:0)+'</span></div>';
+  el('costBox').innerHTML=cb;
+}
+function mkChart(id,type,data,opts){
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(el(id),{type:type,data:data,options:opts});
+}
+
+async function loadList(){
+  var m=el('listMonth').value||today().slice(0,7);
+  var from=m+'-01';var to=m+'-31';
+  var r=await sb.from('fin_transactions').select('*,fin_categories(name)').gte('occurred_at',from).lte('occurred_at',to).order('occurred_at',{ascending:false}).order('id',{ascending:false}).limit(500);
+  var list=r.data||[];
+  var box=el('txList');box.innerHTML='';
+  if(list.length===0){box.innerHTML='<div class="note">ยังไม่มีรายการในเดือนนี้</div>';return;}
+  var curDate='';
+  list.forEach(function(x){
+    if(x.occurred_at!==curDate){
+      curDate=x.occurred_at;
+      var dh=document.createElement('div');dh.style.cssText='font-size:12px;font-weight:600;color:#0f766e;margin-top:10px';
+      var dd=new Date(x.occurred_at+'T00:00:00');
+      dh.textContent=dd.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+      box.appendChild(dh);
+    }
+    var row=document.createElement('div');row.className='txrow';
+    var inc=x.kind==='income';
+    var slipBtn=x.slip_path?'<button title="ดูสลิป" onclick="viewSlip(&quot;'+x.slip_path+'&quot;)">🧾</button>':'';
+    row.innerHTML='<div class="ic" style="background:'+(inc?'#e6f7f0':'#feeceb')+'">'+(inc?'💰':'🛒')+'</div>'+
+      '<div class="info"><div class="cat">'+((x.fin_categories&&x.fin_categories.name)||'ไม่ระบุ')+(x.source==='import'?' <span style="font-size:10px;color:#889">(นำเข้า)</span>':'')+'</div>'+
+      (x.note?'<div class="nt">'+x.note+'</div>':'')+'</div>'+
+      '<div class="amt" style="color:'+(inc?'#0a8f5b':'#d93025')+'">'+(inc?'+':'-')+money(x.amount)+'</div>'+
+      '<div class="ops">'+slipBtn+'<button onclick="editTx('+x.id+')">✎</button><button onclick="delTx('+x.id+')">🗑</button></div>';
+    box.appendChild(row);
+  });
+}
+async function viewSlip(p){
+  var r=await sb.storage.from('slips').createSignedUrl(p,3600);
+  if(r.data)window.open(r.data.signedUrl,'_blank');
+}
+async function delTx(id){
+  if(!confirm('ลบรายการนี้?'))return;
+  await sb.from('fin_transactions').delete().eq('id',id);
+  await loadAll();
+}
+async function editTx(id){
+  var r=await sb.from('fin_transactions').select('*').eq('id',id).single();
+  var x=r.data;if(!x)return;
+  editingId=id;setKind(x.kind);
+  el('amt').value=x.amount;el('date').value=x.occurred_at;el('note').value=x.note||'';
+  setTimeout(function(){
+    var i=0;cats.filter(function(c){return c.kind===x.kind&&c.is_active;}).forEach(function(c,idx){if(c.id===x.category_id)i=idx;});
+    var chips=el('catChips').querySelectorAll('.chip');
+    if(chips[i]){chips[i].click();}
+  },50);
+  el('formTitle').textContent='แก้ไขรายการ #'+id;
+  el('cancelEdit').classList.remove('hidden');
+  showTab('entry');window.scrollTo(0,0);
+}
+
+function showTab(t){
+  ['entry','dash','list','import'].forEach(function(x){
+    el('tab-'+x).classList.toggle('hidden',x!==t);
+    el('nb-'+x).classList.toggle('on',x===t);
+  });
+  if(t==='dash')renderDash();
+}
+
+var impHdr=[],impData=[];
+el('impFile').addEventListener('change',async function(ev){
+  var f=ev.target.files[0];if(!f)return;
+  var buf=await f.arrayBuffer();
+  var wb=XLSX.read(buf,{type:'array',raw:false});
+  var ws=wb.Sheets[wb.SheetNames[0]];
+  var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});
+  rows=rows.filter(function(r){return r.some(function(c){return String(c).trim()!=='';});});
+  if(rows.length<2){el('impMsg').textContent='อ่านไฟล์ไม่ได้หรือไม่มีข้อมูล';return;}
+  var hi=0,best=-1;
+  rows.slice(0,10).forEach(function(r,idx){var n=r.filter(function(c){return String(c).trim()!=='';}).length;if(n>best){best=n;hi=idx;}});
+  impHdr=rows[hi].map(function(c,i){return String(c).trim()||('คอลัมน์ '+(i+1));});
+  impData=rows.slice(hi+1);
+  ['cDate','cDesc','cAmt','cIn','cOut'].forEach(function(id){
+    var s=el(id);s.innerHTML='';
+    impHdr.forEach(function(h,i){var o=document.createElement('option');o.value=i;o.textContent=h;s.appendChild(o);});
+  });
+  function guess(sel,words){
+    for(var i=0;i<impHdr.length;i++){var h=impHdr[i].toLowerCase();
+      for(var w=0;w<words.length;w++){if(h.indexOf(words[w])>-1){el(sel).value=i;return;}}}
+  }
+  guess('cDate',['date','วันที่','วัน/']);
+  guess('cDesc',['desc','รายละเอียด','รายการ','memo','detail']);
+  guess('cAmt',['amount','จำนวนเงิน','ยอด']);
+  guess('cIn',['deposit','ฝาก','เงินเข้า','credit','รับ']);
+  guess('cOut',['withdraw','ถอน','เงินออก','debit','จ่าย']);
+  el('impMap').classList.remove('hidden');
+  el('impMsg').textContent='พบข้อมูล '+impData.length+' แถว — ตรวจสอบการจับคู่คอลัมน์แล้วกด "ดูตัวอย่าง"';
+});
+function modeChange(){
+  var two=el('cMode').value==='two';
+  el('oneBox').classList.toggle('hidden',two);
+  el('twoBox').classList.toggle('hidden',!two);
+}
+function parseDate(s){
+  s=String(s).trim();if(!s)return null;
+  if(s.length>=10&&s.charAt(4)==='-')return s.slice(0,10);
+  var parts=s.split(' ')[0].split('/');
+  if(parts.length===3){
+    var d=parseInt(parts[0],10),m=parseInt(parts[1],10),y=parseInt(parts[2],10);
+    if(y<100)y+=2000;
+    if(y>2400)y-=543;
+    if(d>0&&d<32&&m>0&&m<13&&y>2000)return y+'-'+pad(m)+'-'+pad(d);
+  }
+  return null;
+}
+function parseAmt(s){
+  s=String(s).replace(/,/g,'').replace(/ /g,'').trim();
+  if(!s)return 0;var v=parseFloat(s);return isNaN(v)?0:v;
+}
+function hash(s){var h=5381;for(var i=0;i<s.length;i++){h=((h<<5)+h+s.charCodeAt(i))|0;}return 'h'+(h>>>0).toString(36);}
+function buildRows(){
+  var di=+el('cDate').value,de=+el('cDesc').value,mode=el('cMode').value;
+  var out=[];
+  var incCat=null,expCat=null;
+  cats.forEach(function(c){if(c.kind==='income'&&c.name.indexOf('อื่น')>-1)incCat=c.id;if(c.kind==='expense'&&c.name.indexOf('อื่น')>-1)expCat=c.id;});
+  impData.forEach(function(r,idx){
+    var dt=parseDate(r[di]);if(!dt)return;
+    var desc=String(r[de]||'').trim();
+    var amt=0,knd='';
+    if(mode==='one'){
+      amt=parseAmt(r[+el('cAmt').value]);
+      if(amt===0)return;
+      knd=amt>0?'income':'expense';amt=Math.abs(amt);
+    }else{
+      var vin=parseAmt(r[+el('cIn').value]),vout=parseAmt(r[+el('cOut').value]);
+      if(vin>0){knd='income';amt=vin;}
+      else if(vout>0){knd='expense';amt=Math.abs(vout);}
+      else return;
+    }
+    out.push({occurred_at:dt,kind:knd,amount:amt,note:desc||null,source:'import',
+      category_id:knd==='income'?incCat:expCat,
+      import_hash:hash(dt+'|'+knd+'|'+amt+'|'+desc+'|'+idx)});
+  });
+  return out;
+}
+function previewImp(){
+  impRows=buildRows();
+  if(impRows.length===0){el('impPrev').innerHTML='<div class="note">อ่านไม่ได้ ลองเปลี่ยนคอลัมน์แล้วลองใหม่</div>';el('impGo').classList.add('hidden');return;}
+  var h='<table><tr><th>วันที่</th><th>ประเภท</th><th>จำนวน</th><th>รายละเอียด</th></tr>';
+  impRows.slice(0,8).forEach(function(x){
+    h+='<tr><td>'+x.occurred_at+'</td><td>'+(x.kind==='income'?'รับ':'จ่าย')+'</td><td>'+money(x.amount)+'</td><td>'+(x.note||'')+'</td></tr>';
+  });
+  h+='</table><div class="note">แสดง 8 จาก '+impRows.length+' รายการ</div>';
+  el('impPrev').innerHTML=h;
+  el('impGo').classList.remove('hidden');
+}
+async function doImport(){
+  el('impGo').disabled=true;
+  var u=(await sb.auth.getUser()).data.user;
+  var rows=impRows.map(function(x){x.user_id=u.id;return x;});
+  var ok=0,fail=0;
+  for(var i=0;i<rows.length;i+=100){
+    var r=await sb.from('fin_transactions').upsert(rows.slice(i,i+100),{onConflict:'user_id,import_hash',ignoreDuplicates:true});
+    if(r.error){fail++;console.log(r.error);}else{ok+=rows.slice(i,i+100).length;}
+  }
+  el('impGo').disabled=false;
+  el('impMsg').textContent=fail?'นำเข้าบางส่วนไม่สำเร็จ ลองใหม่อีกครั้ง':'นำเข้าเรียบร้อย '+ok+' รายการ (รายการซ้ำถูกข้ามอัตโนมัติ) ✓';
+  el('impGo').classList.add('hidden');el('impPrev').innerHTML='';
+  await loadAll();
+}
+
+init();
+</script>
+</body>
+</html>
