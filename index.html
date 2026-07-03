@@ -3,77 +3,77 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#3b82f6">
+<meta name="theme-color" content="#e58963">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<title>บัญชีร้านโจ๊ก</title>
+<title>หมูกะโจ๊ก</title>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Prompt',sans-serif;color:#2e3d52;padding-bottom:76px;min-height:100vh;
+body{font-family:'Prompt',sans-serif;color:#4a382e;padding-bottom:76px;min-height:100vh;
 background:
- radial-gradient(55% 45% at 88% 6%, rgba(255,222,120,.38), transparent 62%),
- radial-gradient(50% 42% at 8% 18%, rgba(147,197,253,.55), transparent 65%),
- radial-gradient(75% 55% at 50% 104%, rgba(30,64,175,.20), transparent 62%),
- linear-gradient(180deg,#f8fbff 0%,#eef4ff 55%,#f6f9ff 100%);
+ radial-gradient(55% 45% at 88% 6%, rgba(255,214,150,.40), transparent 62%),
+ radial-gradient(50% 42% at 8% 18%, rgba(245,178,140,.45), transparent 65%),
+ radial-gradient(75% 55% at 50% 104%, rgba(201,106,72,.16), transparent 62%),
+ linear-gradient(180deg,#fdf8f2 0%,#f9ede2 55%,#fcf4ec 100%);
 background-attachment:fixed}
 .hidden{display:none!important}
-header{background:linear-gradient(135deg,#1e40af 0%,#3b82f6 70%,#60a5fa 100%);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+header{background:linear-gradient(135deg,#c96a48 0%,#e58963 70%,#f2a98a 100%);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
 header h1{font-size:17px;font-weight:600}
 header button{background:rgba(255,255,255,.15);border:0;color:#fff;padding:6px 12px;border-radius:8px;font-family:inherit;font-size:13px}
 main{max-width:860px;margin:0 auto;padding:14px}
-.card{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(59,130,246,.10)}
-.card h3{font-size:14px;font-weight:600;color:#3b82f6;margin-bottom:10px}
+.card{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(217,125,80,.10)}
+.card h3{font-size:14px;font-weight:600;color:#e58963;margin-bottom:10px}
 label{font-size:13px;color:#555;display:block;margin:10px 0 4px}
-input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid #dbe6f4;border-radius:10px;font-family:inherit;font-size:15px;background:#fff}
-input:focus,select:focus{outline:none;border-color:#3b82f6}
-.btn{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;font-family:inherit;font-size:16px;font-weight:600;margin-top:14px;cursor:pointer}
+input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid #f0dccb;border-radius:10px;font-family:inherit;font-size:15px;background:#fff}
+input:focus,select:focus{outline:none;border-color:#e58963}
+.btn{width:100%;padding:13px;border:0;border-radius:12px;background:linear-gradient(135deg,#d9744f,#e58963);color:#fff;font-family:inherit;font-size:16px;font-weight:600;margin-top:14px;cursor:pointer}
 .btn:disabled{opacity:.5}
-.btn2{background:#fff;color:#3b82f6;border:1.5px solid #3b82f6}
+.btn2{background:#fff;color:#e58963;border:1.5px solid #e58963}
 .seg{display:flex;gap:8px;margin-bottom:4px}
-.seg button{flex:1;padding:11px;border-radius:12px;border:1.5px solid #dbe6f4;background:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;color:#666}
+.seg button{flex:1;padding:11px;border-radius:12px;border:1.5px solid #f0dccb;background:#fff;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;color:#666}
 .seg button.inc.on{background:#e9f6ef;border-color:#16a34a;color:#16a34a}
 .seg button.exp.on{background:#fdefef;border-color:#e05252;color:#e05252}
 .amount{font-size:28px;text-align:center;font-weight:700;letter-spacing:1px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
-.chip{padding:8px 14px;border-radius:20px;border:1.5px solid #dbe6f4;background:#fff;font-family:inherit;font-size:13px;cursor:pointer;color:#444}
-.chip.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.chip{padding:8px 14px;border-radius:20px;border:1.5px solid #f0dccb;background:#fff;font-family:inherit;font-size:13px;cursor:pointer;color:#444}
+.chip.on{background:#e58963;border-color:#e58963;color:#fff}
 .mini{display:flex;gap:10px;text-align:center}
-.mini div{flex:1;background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:10px;box-shadow:0 2px 10px rgba(59,130,246,.10)}
+.mini div{flex:1;background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:10px;box-shadow:0 2px 10px rgba(217,125,80,.10)}
 .mini .t{font-size:12px;color:#777}
 .mini .v{font-size:16px;font-weight:700}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 @media(max-width:640px){.grid3{grid-template-columns:1fr}}
-.pcard{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(59,130,246,.10)}
-.pcard .pt{font-size:13px;font-weight:600;color:#3b82f6;margin-bottom:8px}
+.pcard{background:rgba(255,255,255,.88);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.7);border-radius:16px;padding:14px;box-shadow:0 2px 10px rgba(217,125,80,.10)}
+.pcard .pt{font-size:13px;font-weight:600;color:#e58963;margin-bottom:8px}
 .row{display:flex;justify-content:space-between;font-size:14px;padding:3px 0}
 .g{color:#16a34a;font-weight:600}.r{color:#e05252;font-weight:600}.b{font-weight:700}
-.txrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #eef4fb}
+.txrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f7ece0}
 .txrow .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .txrow .info{flex:1;min-width:0}
 .txrow .cat{font-size:14px;font-weight:500}
 .txrow .nt{font-size:12px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .txrow .amt{font-weight:700;font-size:15px;white-space:nowrap}
 .txrow .ops{display:flex;gap:6px}
-.txrow .ops button{border:0;background:#f4f8fd;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #e6eef8;display:flex;z-index:10;padding-bottom:env(safe-area-inset-bottom)}
+.txrow .ops button{border:0;background:#faf2e9;border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid #f3e3d4;display:flex;z-index:10;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;padding:9px 0 7px;border:0;background:none;font-family:inherit;font-size:11px;color:#889;cursor:pointer}
 nav button .i{display:block;font-size:20px;margin-bottom:2px}
-nav button.on{color:#3b82f6;font-weight:600}
+nav button.on{color:#e58963;font-weight:600}
 .auth{max-width:380px;margin:8vh auto;padding:0 16px}
 .auth .logo{text-align:center;font-size:44px;margin-bottom:6px}
 .auth h2{text-align:center;font-size:20px;margin-bottom:18px}
 .err{color:#e05252;font-size:13px;margin-top:10px;text-align:center}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{border:1px solid #e6eef8;padding:5px 7px;text-align:left;white-space:nowrap}
+th,td{border:1px solid #f3e3d4;padding:5px 7px;text-align:left;white-space:nowrap}
 .note{font-size:12px;color:#777;margin-top:8px;line-height:1.6}
-.bar{height:8px;border-radius:4px;background:#eef4fb;overflow:hidden;margin:4px 0 8px}
-.bar i{display:block;height:100%;background:#3b82f6}
+.bar{height:8px;border-radius:4px;background:#f7ece0;overflow:hidden;margin:4px 0 8px}
+.bar i{display:block;height:100%;background:#e58963}
 canvas{max-height:260px}
 </style>
 </head>
@@ -81,7 +81,7 @@ canvas{max-height:260px}
 
 <div id="authView" class="auth">
   <div class="logo">🥣</div>
-  <h2>บัญชีร้านโจ๊ก</h2>
+  <h2>หมูกะโจ๊ก</h2>
   <div class="card">
     <label>อีเมล</label><input id="email" type="email" autocomplete="username">
     <label>รหัสผ่าน</label><input id="pw" type="password" autocomplete="current-password">
@@ -91,7 +91,7 @@ canvas{max-height:260px}
 </div>
 
 <div id="appView" class="hidden">
-<header><h1>🥣 บัญชีร้านโจ๊ก</h1><button onclick="logout()">ออกจากระบบ</button></header>
+<header><h1>🥣 หมูกะโจ๊ก</h1><button onclick="logout()">ออกจากระบบ</button></header>
 <main>
 
 <section id="tab-entry">
@@ -323,7 +323,7 @@ function renderDash(){
     }
   });
   var cl=Object.keys(byCat),cv=cl.map(function(k){return byCat[k];});
-  mkChart('chCat','doughnut',{labels:cl,datasets:[{data:cv,backgroundColor:['#3b82f6','#f2a0a0','#f3ba55','#6366f1','#0ea5e9','#f97316','#84cc16','#d946ef','#64748b','#14b8a6','#a855f7','#f43f5e']}]},{responsive:true,plugins:{legend:{position:'right'}}});
+  mkChart('chCat','doughnut',{labels:cl,datasets:[{data:cv,backgroundColor:['#e58963','#f3ba55','#c96a48','#e7b9a3','#d98fb0','#a3b18a','#8fbfae','#a08b7d','#f2a0a0','#dcc4a4','#b96f8f','#7d9db5']}]},{responsive:true,plugins:{legend:{position:'right'}}});
   var m=sumRange(ms,t),fx=0,vr=0;
   TX.forEach(function(x){
     if(x.kind==='expense'&&x.occurred_at>=ms){
@@ -358,7 +358,7 @@ async function loadList(){
   list.forEach(function(x){
     if(x.occurred_at!==curDate){
       curDate=x.occurred_at;
-      var dh=document.createElement('div');dh.style.cssText='font-size:12px;font-weight:600;color:#3b82f6;margin-top:10px';
+      var dh=document.createElement('div');dh.style.cssText='font-size:12px;font-weight:600;color:#e58963;margin-top:10px';
       var dd=new Date(x.occurred_at+'T00:00:00');
       dh.textContent=dd.toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
       box.appendChild(dh);
