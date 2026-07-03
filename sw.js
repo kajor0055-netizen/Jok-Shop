@@ -1,5 +1,5 @@
 // Service Worker บัญชีร้านโจ๊ก
-var CACHE = 'jok-v1';
+var CACHE = 'jok-v2';
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(['./', './index.html', './manifest.json']); }));
